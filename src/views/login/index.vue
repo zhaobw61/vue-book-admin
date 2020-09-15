@@ -87,7 +87,11 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      callback()
+      if (value.length < 1) {
+        callback(new Error('密码不能少于1位'))
+      } else {
+        callback()
+      }
     }
     return {
       loginForm: {
