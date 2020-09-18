@@ -3,13 +3,44 @@
         <el-upload
             :action="action"
             :headers="headers"
-        >请上传</el-upload>
+            :multiple="false"
+            :limit="1"
+            :before-upload="beforeUpload"
+            :on-success="onSuccess"
+            :on-error="onError"
+            :on-remove="onRemove"
+            :on-exceed="onExceed"
+            :file-list="fileList"
+            :disabled="disabled"
+            drag
+            show-file-list
+            accept="application/epub+zip"
+            class="image-upload"
+        >
+        <i class="el-icon-upload" />
+        <div class="el-upload__text" v-if="fileList.length === 0">
+            请将电子书拖入或<em>点击上传</em>
+        </div>
+        <div class="el-upload__text" v-else>图书已上传</div>
+        </el-upload>
     </div>
 </template>
 
 <script>
 import { getToken } from '../../utils/auth'
 export default {
+    props: {
+        fileList: {
+            type: Array,
+            default() {
+                return []
+            }
+        },
+        disabled: {
+            type: Boolean,
+            default: false
+        }
+    },
     data() {
         return {
             action: `${process.env.VUE_APP_BASE_API}/book/upload`
@@ -20,6 +51,26 @@ export default {
             return {
                 Authorization:`Bearer ${getToken()}`
             }
+        }
+    },
+    methods: {
+        beforeUpload() {
+            this.$emit('beforeUpload', file);
+        },
+        onSuccess() {},
+        onError(err) {
+            const errMsg = (err.message && JSON.parse(err.message));
+            this.$message({
+                message: errMsg && errMsg.msg && `上传失败，失败的原因：${errMsg.msg} || '上传失败'`,
+                type: 'error'
+            })
+        },
+        onRemove() {},
+        onExceed() {
+            this.$message({
+                message: '每次只能上传一本电子书',
+                type: 'warning'
+            })
         }
     }
 }
