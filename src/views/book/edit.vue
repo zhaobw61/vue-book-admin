@@ -1,5 +1,5 @@
 <template>
-    <detail is-edit></detail>
+    <detail is-edit />
 </template>
 
 <script>

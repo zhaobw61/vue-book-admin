@@ -4,16 +4,16 @@
             <el-button v-if="!isEdit" @click="showGuide">显示帮助</el-button>
             <el-button
             v-loading="loading"
-            @click="submitForm"
             type="success"
             style="marign-left: 10px"
+            @click="submitForm"
             >{{ isEdit ? '编辑电子书' : '新增电子书' }}</el-button>
         </sticky>
         <div class="detail-container">
             <el-row>
                 <Warning />
                 <el-col :span="24">
-
+                    <ebook-upload />
                 </el-col>
                 <el-col :span="24">
 
@@ -26,9 +26,11 @@
 <script>
 import Sticky from '../../../components/Sticky/index'
 import Warning from './Warning.vue'
+import EbookUpload from '../../../components/EbookUpload/index'
 import { constants } from 'zlib';
+
 export default {
-    components: { Sticky, Warning },
+    components: { Sticky, Warning, EbookUpload },
     props: {
         isEdit: Boolean
     },
