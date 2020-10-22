@@ -107,7 +107,7 @@
         <el-col :span="24">
           <el-form-item :label-width="labelWidth" label="目录:">
             <div v-if="postForm.contents && postForm.contents.length > 0" class="contents-wrapper">
-              <el-tree />
+              <el-tree :data="contentsTree" @node-click="onContentClick"/>
             </div>
             <span v-else>无</span>
           </el-form-item>
@@ -135,10 +135,16 @@ export default {
         ebook_uri: ''
       },
       fileList: [],
-      labelWidth: '120px'
+      labelWidth: '120px',
+      contentsTree: []
     }
   },
   methods: {
+    onContentClick(data) {
+      if (data.text){
+        window.open(data.text);
+      }
+    },
     setData(data) {
       let {
         title,
@@ -150,6 +156,7 @@ export default {
         url,
         originalName,
         contents,
+        contentsTree,
         fileName,
         coverPath,
         filePath,
@@ -171,6 +178,8 @@ export default {
         filePath,
         unzipPath
       }
+
+      this.contentsTree = contentsTree;
     },
     onUploadSuccess(data) {
       console.log('onUploadSuccess', data);
