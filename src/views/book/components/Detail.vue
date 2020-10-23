@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="postForm" :model="postForm">
+  <el-form ref="postForm" :model="postForm" :rules="rules">
     <sticky :class-name="'sub-navbar'">
       <el-button v-if="!isEdit" @click="showGuide">显示帮助</el-button>
       <el-button v-loading="loading" type="success" style="marign-left: 10px" @click="submitForm">{{ isEdit ? '编辑电子书' : '新增电子书' }}</el-button>
@@ -18,7 +18,7 @@
           </el-form-item>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="作者：" :label-width="labelWidth">
+              <el-form-item prop="author" label="作者：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.author"
                   placeholder="作者"
@@ -26,7 +26,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="出版社：" :label-width="labelWidth">
+              <el-form-item prop="publisher" label="出版社：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.publisher"
                   placeholder="出版社"
@@ -36,7 +36,7 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="语言：" :label-width="labelWidth">
+              <el-form-item prop="language" label="语言：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.language"
                   placeholder="作者"
@@ -107,7 +107,7 @@
         <el-col :span="24">
           <el-form-item :label-width="labelWidth" label="目录:">
             <div v-if="postForm.contents && postForm.contents.length > 0" class="contents-wrapper">
-              <el-tree :data="contentsTree" @node-click="onContentClick"/>
+              <el-tree :data="contentsTree" @node-click="onContentClick" />
             </div>
             <span v-else>无</span>
           </el-form-item>
@@ -123,12 +123,43 @@ import Warning from './Warning'
 import EbookUpload from '../../../components/EbookUpload'
 import MdInput from '../../../components/MDinput'
 
+const defaultForm = {
+  title: '',
+  author: '',
+  publisher: '',
+  language: '',
+  rootFile: '',
+  cover: '',
+  url: '',
+  originalName: '',
+  contents: '',
+  contentsTree: '',
+  fileName: '',
+  coverPath: '',
+  filePath: '',
+  unzipPath: ''
+}
+
+const fields = {
+  'title': '标题',
+  'author': '作者',
+  'publisher': '出版社',
+  'language': '语言'
+}
+
 export default {
   components: { MdInput, Sticky, Warning, EbookUpload },
   props: {
     isEdit: Boolean
   },
   data() {
+    const validateRequire = (rule, value, callback) => {
+      if(value.length === 0) {
+        callback(new Error(fields[rule.field] + '必须填写'))
+      } else {
+        callback()
+      }
+    }
     return {
       loading: false,
       postForm: {
@@ -136,17 +167,27 @@ export default {
       },
       fileList: [],
       labelWidth: '120px',
-      contentsTree: []
+      contentsTree: [],
+      rules: {
+        title: [{ validator: validateRequire }],
+        author: [{ validator: validateRequire }],
+        publisher: [{ validator: validateRequire }],
+        language: [{ validator: validateRequire }],
+      }
     }
   },
   methods: {
     onContentClick(data) {
-      if (data.text){
-        window.open(data.text);
+      if (data.text) {
+        window.open(data.text)
       }
     },
+    setDefault() {
+      this.postForm = Object.assign({}, defaultForm)
+      this.contentsTree = [];
+    },
     setData(data) {
-      let {
+      const {
         title,
         author,
         publisher,
@@ -161,7 +202,7 @@ export default {
         coverPath,
         filePath,
         unzipPath
-      } = data;
+      } = data
       this.postForm = {
         ...this.postForm,
         title,
@@ -179,20 +220,27 @@ export default {
         unzipPath
       }
 
-      this.contentsTree = contentsTree;
+      this.contentsTree = contentsTree
     },
     onUploadSuccess(data) {
-      console.log('onUploadSuccess', data);
-      this.setData(data);
+      console.log('onUploadSuccess', data)
+      this.setData(data)
     },
     onUploadRemove() {
-      console.log('onUploadRemove')
+      this.setDefault()
     },
     submitForm() {
-      this.loading = true
-      setTimeout(() => {
-        this.loading = false
-      }, 1000)
+      if(!this.loading) {
+        this.loading = true
+        this.$ref.postForm.validate((valid, fields) => {
+          if(valid){
+
+          } else {
+            const message =  fields[Object.keys(fields)[0]][0].message
+            this.$message = ({message, type: 'error'})
+          }
+        });
+      }
     },
     showGuide() {
       console.log('show guide...')
