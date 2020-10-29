@@ -122,6 +122,7 @@ import Sticky from '../../../components/Sticky'
 import Warning from './Warning'
 import EbookUpload from '../../../components/EbookUpload'
 import MdInput from '../../../components/MDinput'
+import { createBook } from '../../../api/book'
 
 const defaultForm = {
   title: '',
@@ -162,9 +163,7 @@ export default {
     }
     return {
       loading: false,
-      postForm: {
-        ebook_uri: ''
-      },
+      postForm: {},
       fileList: [],
       labelWidth: '120px',
       contentsTree: [],
@@ -234,7 +233,14 @@ export default {
         this.loading = true
         this.$ref.postForm.validate((valid, fields) => {
           if(valid){
-
+            const book = Object.assign({}, this.postForm)
+            delete book.contents
+            delete book.contentsTree
+            if(!this.isEdit) {
+              createBook(book);
+            } else {
+              updateBook(book);
+            }
           } else {
             const message =  fields[Object.keys(fields)[0]][0].message
             this.$message = ({message, type: 'error'})
