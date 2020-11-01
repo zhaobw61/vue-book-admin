@@ -235,9 +235,9 @@ export default {
         this.loading = true
         this.$refs.postForm.validate((valid, fields) => {
           if(valid){
-            const book = Object.assign({}, this.postForm)
-            delete book.contents
-            delete book.contentsTree
+            const book = Object.assign({}, this.postForm);
+            delete book.contents;
+            delete book.contentsTree;
             if(!this.isEdit) {
               createBook(book).then(response => {
                 const { msg } = response;
