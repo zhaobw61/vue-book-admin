@@ -44,7 +44,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="根文件：" :label-width="labelWidth">
+              <el-form-item prop="rootFile" label="根文件：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.rootFile"
                   placeholder="根文件"
@@ -55,7 +55,7 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="文件路径：" :label-width="labelWidth">
+              <el-form-item prop="filePath" label="文件路径：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.filePath"
                   placeholder="文件路径 "
@@ -64,7 +64,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="解压路径：" :label-width="labelWidth">
+              <el-form-item prop="unzipPath" label="解压路径：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.unzipPath"
                   placeholder="解压路径"
@@ -74,16 +74,16 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="封面路径：" :label-width="labelWidth">
+              <el-form-item prop="coverPath" label="封面路径：" :label-width="labelWidth">
                 <el-input
-                  v-model="postForm.filePath"
+                  v-model="postForm.coverPath"
                   placeholder="封面路径 "
                   disabled
                 />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="文件名称：" :label-width="labelWidth">
+              <el-form-item prop="originalName" label="文件名称：" :label-width="labelWidth">
                 <el-input
                   v-model="postForm.originalName"
                   placeholder="文件名称"
@@ -93,7 +93,7 @@
           </el-row>
           <el-row>
             <el-col :span="24">
-              <el-form-item label="封面：" :label-width="labelWidth">
+              <el-form-item prop="cover" label="封面：" :label-width="labelWidth">
                 <a v-if="postForm.cover" :href="postForm.cover" target="_blank">
                   <img :src="postForm.cover" class="preview-img">
                 </a>
@@ -182,8 +182,10 @@ export default {
       }
     },
     setDefault() {
-      this.postForm = Object.assign({}, defaultForm)
+      // this.postForm = Object.assign({}, defaultForm)
       this.contentsTree = [];
+      this.fileList = [];
+      this.$refs.postForm.resetFields();
     },
     setData(data) {
       const {
@@ -231,15 +233,27 @@ export default {
     submitForm() {
       if(!this.loading) {
         this.loading = true
-        this.$ref.postForm.validate((valid, fields) => {
+        this.$refs.postForm.validate((valid, fields) => {
           if(valid){
             const book = Object.assign({}, this.postForm)
             delete book.contents
             delete book.contentsTree
             if(!this.isEdit) {
-              createBook(book);
+              createBook(book).then(response => {
+                const { msg } = response;
+                this.$notify({
+                  title:'操作成功',
+                  message: msg,
+                  type: 'success',
+                  duration: 2000
+                });
+                this.loading = false;
+                this.setDefault();
+              }).catch(() => {
+                this.loading = false;
+              });
             } else {
-              updateBook(book);
+              // updateBook(book);
             }
           } else {
             const message =  fields[Object.keys(fields)[0]][0].message
