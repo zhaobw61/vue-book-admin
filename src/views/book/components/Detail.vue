@@ -122,7 +122,7 @@ import Sticky from '../../../components/Sticky'
 import Warning from './Warning'
 import EbookUpload from '../../../components/EbookUpload'
 import MdInput from '../../../components/MDinput'
-import { createBook } from '../../../api/book'
+import { createBook, getBook } from '../../../api/book'
 
 const defaultForm = {
   title: '',
@@ -175,7 +175,18 @@ export default {
       }
     }
   },
+  created() {
+    if (this.isEdit) {
+      const fileName = this.$router.aprams.fileName;
+      this.getBookData(fileName);
+    }
+  },
   methods: {
+    getBookData(fileName) {
+        getBook(fileName).then(response => {
+          this.setData(response.data);
+        });
+    },
     onContentClick(data) {
       if (data.text) {
         window.open(data.text)

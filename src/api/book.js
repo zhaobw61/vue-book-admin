@@ -5,5 +5,13 @@ export function createBook(book) {
         url: '/book/create',
         method: 'post',
         data: book
-    })
+    });
+}
+
+export function getBook(fileName) {
+    return request({
+        url: '/book/get',
+        method: 'get',
+        params: { fileName }
+    });
 }
