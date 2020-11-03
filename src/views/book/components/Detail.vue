@@ -106,7 +106,7 @@
       <el-row>
         <el-col :span="24">
           <el-form-item :label-width="labelWidth" label="目录:">
-            <div v-if="postForm.contents && postForm.contents.length > 0" class="contents-wrapper">
+            <div v-if="contentsTree && contentsTree.length > 0" class="contents-wrapper">
               <el-tree :data="contentsTree" @node-click="onContentClick" />
             </div>
             <span v-else>无</span>
@@ -177,7 +177,8 @@ export default {
   },
   created() {
     if (this.isEdit) {
-      const fileName = this.$router.aprams.fileName;
+      console.log('this.$router.params', this.$router.params);
+      const fileName = this.$router.params.fileName;
       this.getBookData(fileName);
     }
   },
@@ -232,7 +233,11 @@ export default {
         unzipPath
       }
 
-      this.contentsTree = contentsTree
+      this.contentsTree = contentsTree;
+      this.fileList = [{
+        name: originalName,
+        url
+      }];
     },
     onUploadSuccess(data) {
       console.log('onUploadSuccess', data)
