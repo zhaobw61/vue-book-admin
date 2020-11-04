@@ -227,6 +227,7 @@ export default {
         url,
         originalName,
         contents,
+        contentsTree,
         fileName,
         coverPath,
         filePath,
