@@ -122,7 +122,8 @@ import Sticky from '../../../components/Sticky'
 import Warning from './Warning'
 import EbookUpload from '../../../components/EbookUpload'
 import MdInput from '../../../components/MDinput'
-import { createBook, getBook } from '../../../api/book'
+import { createBook, getBook, updateBook } from '../../../api/book'
+import func from './vue-temp/vue-editor-bridge';
 
 const defaultForm = {
   title: '',
@@ -236,7 +237,7 @@ export default {
 
       this.contentsTree = contentsTree;
       this.fileList = [{
-        name: originalName,
+        name: originalName || fileName,
         url
       }];
     },
@@ -248,6 +249,16 @@ export default {
       this.setDefault()
     },
     submitForm() {
+      const onSuccess = (response) => {
+        const { msg } = response;
+        this.$notify({
+          title:'操作成功',
+          message: msg,
+          type: 'success',
+          duration: 2000
+        });
+        this.loading = false;
+      }
       if(!this.loading) {
         this.loading = true
         this.$refs.postForm.validate((valid, fields) => {
@@ -257,20 +268,17 @@ export default {
             delete book.contentsTree;
             if(!this.isEdit) {
               createBook(book).then(response => {
-                const { msg } = response;
-                this.$notify({
-                  title:'操作成功',
-                  message: msg,
-                  type: 'success',
-                  duration: 2000
-                });
-                this.loading = false;
+                onSuccess(response);
                 this.setDefault();
               }).catch(() => {
                 this.loading = false;
               });
             } else {
-              // updateBook(book);
+              updateBook(book).then(response => {
+                onSuccess(response);
+              }).catch(() => {
+                this.loading = false;
+              });
             }
           } else {
             const message =  fields[Object.keys(fields)[0]][0].message
