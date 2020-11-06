@@ -123,7 +123,6 @@ import Warning from './Warning'
 import EbookUpload from '../../../components/EbookUpload'
 import MdInput from '../../../components/MDinput'
 import { createBook, getBook, updateBook } from '../../../api/book'
-import func from './vue-temp/vue-editor-bridge';
 
 const defaultForm = {
   title: '',
@@ -156,7 +155,7 @@ export default {
   },
   data() {
     const validateRequire = (rule, value, callback) => {
-      if(value.length === 0) {
+      if (value.length === 0) {
         callback(new Error(fields[rule.field] + '必须填写'))
       } else {
         callback()
@@ -172,22 +171,22 @@ export default {
         title: [{ validator: validateRequire }],
         author: [{ validator: validateRequire }],
         publisher: [{ validator: validateRequire }],
-        language: [{ validator: validateRequire }],
+        language: [{ validator: validateRequire }]
       }
     }
   },
   created() {
     if (this.isEdit) {
-      console.log('this.$router.params', this.$router.params);
-      const fileName = this.$router.params.fileName;
-      this.getBookData(fileName);
+      console.log('this.$router.params', this.$router.params)
+      const fileName = this.$router.params.fileName
+      this.getBookData(fileName)
     }
   },
   methods: {
     getBookData(fileName) {
-        getBook(fileName).then(response => {
-          this.setData(response.data);
-        });
+      getBook(fileName).then(response => {
+        this.setData(response.data)
+      })
     },
     onContentClick(data) {
       if (data.text) {
@@ -196,9 +195,9 @@ export default {
     },
     setDefault() {
       // this.postForm = Object.assign({}, defaultForm)
-      this.contentsTree = [];
-      this.fileList = [];
-      this.$refs.postForm.resetFields();
+      this.contentsTree = []
+      this.fileList = []
+      this.$refs.postForm.resetFields()
     },
     setData(data) {
       const {
@@ -235,11 +234,11 @@ export default {
         unzipPath
       }
 
-      this.contentsTree = contentsTree;
+      this.contentsTree = contentsTree
       this.fileList = [{
         name: originalName || fileName,
         url
-      }];
+      }]
     },
     onUploadSuccess(data) {
       console.log('onUploadSuccess', data)
@@ -250,41 +249,41 @@ export default {
     },
     submitForm() {
       const onSuccess = (response) => {
-        const { msg } = response;
+        const { msg } = response
         this.$notify({
-          title:'操作成功',
+          title: '操作成功',
           message: msg,
           type: 'success',
           duration: 2000
-        });
-        this.loading = false;
+        })
+        this.loading = false
       }
-      if(!this.loading) {
+      if (!this.loading) {
         this.loading = true
         this.$refs.postForm.validate((valid, fields) => {
-          if(valid){
-            const book = Object.assign({}, this.postForm);
-            delete book.contents;
-            delete book.contentsTree;
-            if(!this.isEdit) {
+          if (valid) {
+            const book = Object.assign({}, this.postForm)
+            delete book.contents
+            delete book.contentsTree
+            if (!this.isEdit) {
               createBook(book).then(response => {
-                onSuccess(response);
-                this.setDefault();
+                onSuccess(response)
+                this.setDefault()
               }).catch(() => {
-                this.loading = false;
-              });
+                this.loading = false
+              })
             } else {
               updateBook(book).then(response => {
-                onSuccess(response);
+                onSuccess(response)
               }).catch(() => {
-                this.loading = false;
-              });
+                this.loading = false
+              })
             }
           } else {
-            const message =  fields[Object.keys(fields)[0]][0].message
-            this.$message = ({message, type: 'error'})
+            const message = fields[Object.keys(fields)[0]][0].message
+            this.$message = ({ message, type: 'error' })
           }
-        });
+        })
       }
     },
     showGuide() {
