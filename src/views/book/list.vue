@@ -31,11 +31,9 @@
         <el-option
           v-for="item in categoryList"
           :key="item.value"
-          :label="item.label"
+          :label="item.label + '(' + item.num + ')'"
           :value="item.value"
-        >
-          item.name
-        </el-option>
+        />
       </el-select>
       <el-button
         v-waves
@@ -66,7 +64,33 @@
         显示封面
       </el-checkbox>
     </div>
-    <el-table />
+    <el-table
+      :key="tableKey"
+      v-loading="listLoading"
+      :data="list"
+      border
+      fit
+      highlight-current-row
+      style="width: 100%"
+      @sort-change="sortChange"
+    >
+      <el-table-column
+        label="ID"
+        prop="id"
+        sortable="custom"
+        align="center"
+        width="80"
+      />
+      <el-table-column
+        label="书名"
+        width="150"
+        align="center"
+      >
+        <template slot-scope="{ row: { title }}">
+          <span>{{ title }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
     <pagination
       :total="0"
     />
@@ -76,7 +100,7 @@
 <script>
 import Pagination from '../../components/Pagination/index'
 import waves from '../../directive/waves/waves'
-import { getCategory } from '../../api/book'
+import { getCategory, listBook } from '../../api/book'
 
 export default {
   components: {
@@ -87,22 +111,35 @@ export default {
   },
   data() {
     return {
+      tableKey: 0,
+      listLoading: true,
       listQuery: {},
       showCover: false,
-      categoryList: []
+      categoryList: [],
+      list: []
     }
   },
   mounted() {
+    this.getList()
     this.getCategoryList()
   },
   methods: {
+    sortChange(data) {
+      console.log(data)
+    },
+    getList() {
+      this.listLoading = true
+      listBook(this.listQuery).then(response => {
+
+      })
+    },
     getCategoryList() {
       getCategory().then(response => {
         this.categoryList = response.data
       })
     },
     handleFilter() {
-      // console.log('asdasd');
+      this.getList()
     },
     handleCreate() {
       this.$router.push('/book/create')
