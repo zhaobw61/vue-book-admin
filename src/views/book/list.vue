@@ -167,20 +167,27 @@ export default {
     return {
       tableKey: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        pageSize: 20
-      },
+      listQuery: {},
       showCover: false,
       categoryList: [],
       list: []
     }
+  },
+  created() {
+    this.parseQuery()
   },
   mounted() {
     this.getList()
     this.getCategoryList()
   },
   methods: {
+    parseQuery() {
+      const listQuery = {
+        page: 1,
+        pageSize: 20
+      }
+      this.listQuery = { ...listQuery, ...this.listQuery }
+    },
     sortChange(data) {
       console.log(data)
     },
@@ -194,7 +201,8 @@ export default {
     },
     getCategoryList() {
       getCategory().then(response => {
-        this.categoryList = response.data.list
+        console.log('response', response)
+        this.categoryList = response.data
       })
     },
     handleFilter() {
