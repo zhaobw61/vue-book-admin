@@ -146,7 +146,11 @@
       </el-table-column>
     </el-table>
     <pagination
-      :total="0"
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.pageSize"
+      @pagination="getList"
     />
   </div>
 </template>
@@ -170,7 +174,8 @@ export default {
       listQuery: {},
       showCover: false,
       categoryList: [],
-      list: []
+      list: [],
+      total: 0
     }
   },
   created() {
@@ -189,7 +194,16 @@ export default {
       this.listQuery = { ...listQuery, ...this.listQuery }
     },
     sortChange(data) {
-      console.log(data)
+      const { prop, order } = data
+      this.sortBy(prop, order)
+    },
+    sortBy(prop, order) {
+      if (order == 'ascending') {
+        this.listQuery.sort = `+${prop}`
+      } else {
+        this.listQuery.sort = `-${prop}`
+      }
+      this.handleFilter()
     },
     wrapperKeyword(k, v) {
       function highlight(value) {
@@ -204,8 +218,9 @@ export default {
     getList() {
       this.listLoading = true
       listBook(this.listQuery).then(response => {
-        const { list } = response.data
+        const { list, total } = response.data
         this.list = list
+        this.total = total
         this.listLoading = false
         this.list.forEach(book => {
           book.titleWrapper = this.wrapperKeyword('title', book.title)
