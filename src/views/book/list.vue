@@ -160,8 +160,9 @@
         align="center"
         fixed="right"
       >
-        <template slot-sope="{ row }">
+        <template slot-scope="{ row }">
           <el-button type="text" icon="el-icon-edit" @click="handleUpdate(row)" />
+          <el-button type="text" icon="el-icon-delete" style="color:#f56c6c" @click="handleDelete(row)" />
         </template>
       </el-table-column>
     </el-table>
@@ -178,7 +179,7 @@
 <script>
 import Pagination from '../../components/Pagination/index'
 import waves from '../../directive/waves/waves'
-import { getCategory, listBook } from '../../api/book'
+import { getCategory, listBook, deleteBook } from '../../api/book'
 import { parseTime } from '@/utils'
 
 export default {
@@ -227,7 +228,7 @@ export default {
       this.sortBy(prop, order)
     },
     sortBy(prop, order) {
-      if (order == 'ascending') {
+      if (order === 'ascending') {
         this.listQuery.sort = `+${prop}`
       } else {
         this.listQuery.sort = `-${prop}`
@@ -247,9 +248,9 @@ export default {
     getList() {
       this.listLoading = true
       listBook(this.listQuery).then(response => {
-        const { list, total } = response.data
+        const { list, count } = response.data
         this.list = list
-        this.total = total
+        this.total = count
         this.listLoading = false
         this.list.forEach(book => {
           book.titleWrapper = this.wrapperKeyword('title', book.title)
@@ -259,7 +260,6 @@ export default {
     },
     getCategoryList() {
       getCategory().then(response => {
-        console.log('response', response)
         this.categoryList = response.data
       })
     },
@@ -271,6 +271,23 @@ export default {
     },
     handleUpdate(row) {
       this.$router.push(`/book/edit/${row.fileName}`)
+    },
+    handleDelete(row) {
+      this.$confirm('此操作将永久删除该电子数， 是否继续', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteBook(row.fileName).then(response => {
+          this.$notify({
+            title: '成功',
+            message: response.msg || '删除信息',
+            type: 'success',
+            duration: 2000
+          })
+          this.handleFilter()
+        })
+      })
     },
     changeShowCover(value) {
       this.changeShowCover = value
