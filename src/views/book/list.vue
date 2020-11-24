@@ -32,7 +32,7 @@
           v-for="item in categoryList"
           :key="item.value"
           :label="item.label + '(' + item.num + ')'"
-          :value="item.value"
+          :value="item.label"
         />
       </el-select>
       <el-button
@@ -72,6 +72,7 @@
       fit
       highlight-current-row
       style="width: 100%"
+      :default-sort="defaultSort"
       @sort-change="sortChange"
     >
       <el-table-column
@@ -171,7 +172,7 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.pageSize"
-      @pagination="getList"
+      @pagination="handleFilter"
     />
   </div>
 </template>
@@ -205,7 +206,8 @@ export default {
       showCover: false,
       categoryList: [],
       list: [],
-      total: 0
+      total: 0,
+      defaultSort: {}
     }
   },
   created() {
@@ -215,13 +217,33 @@ export default {
     this.getList()
     this.getCategoryList()
   },
+  beforeRouteUpdate(to, from, next) {
+    if (to.path == from.path) {
+      const newQuery = Object.assign({}, to.query)
+      const oldQuery = Object.assign({}, from.query)
+      if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+        this.getList()
+      }
+    }
+    next()
+  },
   methods: {
     parseQuery() {
+      const query = Object.assign({}, this.$route.query)
+      const sort = '+id'
       const listQuery = {
         page: 1,
-        pageSize: 20
+        pageSize: 20,
+        sort: '+id'
       }
-      this.listQuery = { ...listQuery, ...this.listQuery }
+      if (query) {
+        query.page && (query.page = +query.page)
+        query.pageSize && (query.pageSize = +query.pageSize)
+        query.sort && (sort = query.sort)
+      }
+      const sortSymbol = sort[0]
+      const sortColumn = sort.slice(1, sort.length)
+      this.listQuery = { ...listQuery, ...query, ...this.listQuery }
     },
     sortChange(data) {
       const { prop, order } = data
@@ -263,8 +285,15 @@ export default {
         this.categoryList = response.data
       })
     },
+    refresh() {
+      this.$router.push({
+        path: 'book/list',
+        query: this.listQuery
+      })
+    },
     handleFilter() {
-      this.getList()
+      this.refresh()
+      // this.getList()
     },
     handleCreate() {
       this.$router.push('/book/create')
